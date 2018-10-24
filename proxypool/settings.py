@@ -16,6 +16,13 @@ MINI_LIMIT_SCORE = 0
 
 INSPECTOR_MAX_TEXT_COUNT = 10
 
+USER_API_ENABLE = True
+USER_API_HOST = '127.0.0.1'
+USER_API_PORT = '5000'
+
+INSPECTOR_ENABLE = True
+GETTER_ENABLE = True
+
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36",
 }
