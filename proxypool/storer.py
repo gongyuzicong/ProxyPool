@@ -9,6 +9,7 @@ import proxypool.errors
 REDIS_KEY = 'proxies'
 POOL_UPPER_LIMIT = 10000
 
+
 class RedisCli(object):
     def __init__(self,
                  host=settings.REDIS_HOST,
@@ -20,7 +21,8 @@ class RedisCli(object):
         :param port: Redis数据库端口
         :param password: Redis数据库登录密码
         """
-        self.redis = redis.StrictRedis(host=host, port=port, password=password, decode_responses=True)
+        result = self.redis = redis.StrictRedis(host=host, port=port, password=password, decode_responses=True)
+        print(result)
 
     def add_proxy(self, proxy, score=settings.INITIAL_SCORE):
         """
@@ -29,7 +31,7 @@ class RedisCli(object):
         :param score: 分值,配合分值管理方法使用
         :return: 添加结果
         """
-        if self.redis.zscore(REDIS_KEY, proxy):
+        if not self.redis.zscore(REDIS_KEY, proxy):
             return self.redis.zadd(REDIS_KEY, score, proxy)
 
     def get_proxy_random(self):
@@ -55,10 +57,10 @@ class RedisCli(object):
         """
         score = self.redis.zscore(REDIS_KEY, proxy)
         if score and score > settings.MINI_LIMIT_SCORE:
-            print("Proxy: {}, Score: {}, Action: -1".format(proxy, score))
+            print("代理: {}, 当前分数: {}, 行为: 分数-1".format(proxy, score))
             return self.redis.zincrby(REDIS_KEY, proxy, -1)
         else:
-            print("Proxy: {}, Score: {}, Action: Remove".format(proxy, score))
+            print("代理: {}, 当前分数: {}, 行为: 删除此代理".format(proxy, score))
             return self.redis.zrem(REDIS_KEY, proxy)
 
     def proxy_is_exists(self, proxy):
@@ -78,6 +80,7 @@ class RedisCli(object):
         :param proxy: 需要设置的代理
         :return: 设置成功与否
         """
+        print('代理 {} 可用, 设置分数为: {}'.format(proxy, settings.MAX_LIMIT_SCORE))
         return self.redis.zadd(REDIS_KEY, settings.MAX_LIMIT_SCORE, proxy)
 
     def get_pool_count(self):
@@ -100,13 +103,15 @@ class RedisCli(object):
         :return: 满了则返回True 否则返回False
         """
         if self.get_pool_count() >= POOL_UPPER_LIMIT:
+            print('当前代理池已满')
             return True
         else:
             return False
 
 
 def storer_test():
-    pass
+    rdc = RedisCli()
+    print(rdc.get_pool_count())
 
 
 if __name__ == '__main__':

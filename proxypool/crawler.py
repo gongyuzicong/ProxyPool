@@ -26,10 +26,11 @@ class CrawlMetaclass(type):
 class Crawler(object, metaclass=CrawlMetaclass):
 
     def get_proxies(self, callback_func):
-        proxies = []
-        for proxy in eval('self.{}()'.format(callback_func)):
-            proxies.append(proxy)
-        return proxies
+        # proxies = []
+        # for proxy in eval('self.{}()'.format(callback_func)):
+        #     proxies.append(proxy)
+        # return proxies
+        yield from eval('self.{}()'.format(callback_func))
 
     def crawl_xicidaili(self, pages=1):
         proxy_info = {

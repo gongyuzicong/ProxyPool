@@ -9,10 +9,12 @@ REDIS_PORT = 6379
 REDIS_PWD = None
 # ---------- Redis Settings End ----------
 
-
+VALID_STATUS_CODES = [200]
 INITIAL_SCORE = 10
 MAX_LIMIT_SCORE = 100
 MINI_LIMIT_SCORE = 0
+
+INSPECTOR_MAX_TEXT_COUNT = 10
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36",
