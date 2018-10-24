@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import requests
-import proxypool.settings
+from proxypool import settings
 from lxml import etree
 import re
 # import bs4
@@ -9,12 +9,29 @@ import pyquery
 import urllib.request
 from collections import Iterator
 
-settings = proxypool.settings.ProxyPoolSettings()
+
+class CrawlMetaclass(type):
+    def __new__(cls, name, bases, attrs):
+        count = 0
+        attrs['__CrawlFunc__'] = []
+        for k, v in attrs.items():
+            if 'crawl' in k:
+                attrs['__CrawlFunc__'].append(k)
+                count += 1
+        attrs['__CrawlFuncCount__'] = count
+        # print(attrs.items())
+        return type.__new__(cls, name, bases, attrs)
 
 
-class Crawler(object):
+class Crawler(object, metaclass=CrawlMetaclass):
 
-    def crawl_xicidaili(self, pages):
+    def get_proxies(self, callback_func):
+        proxies = []
+        for proxy in eval('self.{}()'.format(callback_func)):
+            proxies.append(proxy)
+        return proxies
+
+    def crawl_xicidaili(self, pages=1):
         proxy_info = {
             "ip": "",
             "port": "",
@@ -25,7 +42,7 @@ class Crawler(object):
         # for url in (base_url.format(page) for page in range(1, pages + 1)):
         #     print(url)
         for url in (base_url.format(page) for page in range(1, pages + 1)):
-            response = requests.get(url=url, headers=settings.headers, timeout=2)
+            response = requests.get(url=url, headers=settings.HEADERS, timeout=2)
             if response.status_code == 200:
                 html = etree.HTML(response.text)
                 result = html.xpath('//tr')
@@ -57,7 +74,7 @@ class Crawler(object):
                 except Exception as e:
                     pass
 
-    def crawl_66daili(self, pages):
+    def crawl_66daili(self, pages=1):
         proxy_info = {
             "ip": "",
             "port": "",
@@ -65,9 +82,9 @@ class Crawler(object):
             'area': "",
         }
         base_url = "http://www.66ip.cn/{}.html"
-        for url in (base_url.format(page) for page in range(1, pages)):
+        for url in (base_url.format(page) for page in range(1, pages + 1)):
             try:
-                response = requests.get(url=url, headers=settings.headers, timeout=2)
+                response = requests.get(url=url, headers=settings.HEADERS, timeout=2)
                 if response.status_code == 200:
                     html = pyquery.PyQuery(response.text)
                     trs = html('.containerbox table tr:gt(0)').items()
@@ -84,5 +101,6 @@ class Crawler(object):
 
 if __name__ == '__main__':
     cra = Crawler()
-    for item in cra.crawl_xicidaili(1):
-        print(':'.join([item['ip'], item['port']]))
+    # for item in cra.crawl_xicidaili(1):
+    #     print(':'.join([item['ip'], item['port']]))
+
